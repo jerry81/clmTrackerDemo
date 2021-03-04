@@ -14,7 +14,8 @@
             max-width: 1150px;
         }
 
-        #canvas {
+        #canvas,
+        #overlay {
             position: absolute;
             top: 0px;
             left: 0px;
@@ -75,15 +76,6 @@
 </head>
 
 <body>
-    <script src="./js/libs/dat.gui.min.js"></script>
-    <script src="./js/libs/utils.js"></script>
-    <script src="./js/libs/webgl-utils.js"></script>
-    <script src="../build/clmtrackr.js"></script>
-    <script src="../models/model_pca_20_svm.js"></script>
-    <script src="./js/libs/Stats.js"></script>
-    <script src="./js/face_deformer.js"></script>
-    <script src="./js/libs/jquery.min.js"></script>
-    <script src="./js/libs/poisson_new.js"></script>
     <script src="../lib/clmtrackr-dev/examples/js/libs/dat.gui.min.js"></script>
     <script src="../lib/clmtrackr-dev/examples/js/libs/utils.js"></script>
     <script src="../lib/clmtrackr-dev/examples/js/libs/webgl-utils.js"></script>
@@ -98,24 +90,25 @@
         <div id="container">
             <video id="videoel" width="400" height="300" preload="auto" playsinline autoplay>
             </video>
-            <canvas id="canvas" width="400" height="300"></canvas>
+            <!--             <canvas id="canvas" width="400" height="300"></canvas> -->
             <canvas id="overlay" width="400" height="300"></canvas>
         </div>
         <br />
         <p id="positions"></p>
         <p id="size"></p>
+        <p id="log"></p>
         <script>
             var vid = document.getElementById('videoel');
             var vid_width = vid.width;
             var vid_height = vid.height;
-           
+
             // canvas for copying videoframes to
             var videocanvas = document.createElement('CANVAS');
             videocanvas.width = vid_width;
             videocanvas.height = vid_height;
-         
+
             /*********** Setup of video/webcam and checking for webGL support *********/
-			var videoReady = false;
+            var videoReady = false;
 
 
             var insertAltVideo = function (video) {
@@ -151,6 +144,8 @@
                 alert("There was some problem trying to fetch video from your webcam, using a fallback video instead.");
             }
 
+
+
             navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
             window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
 
@@ -164,41 +159,117 @@
                 alert("Your browser does not seem to support getUserMedia, using a fallback video instead.");
             }
 
-            vid.addEventListener('canplay', function () { videoReady = true; enablestart(); }, false);
 
             /*********** Code for overlay  *********/
 
+            const upperLipTop = [44, 45, 46, 47, 48, 49, 50, 59, 60, 61]
+            const lowerLip = [50, 51, 52, 53, 54, 55, 44, 56, 57, 58]
+            var ctracker = new clm.tracker();
+            ctracker.init();
+            ctracker.start(vid);
+            function getUpperLip(positionArr) {
+                let lips = []
+                upperLipTop.forEach(idx => {
+                    lips.push(positionArr[idx])
+                })
+                return lips
+            }
 
-				var ctracker = new clm.tracker();
-				ctracker.init();
-				ctracker.start(vid);
 
-				function positionLoop() {
-					requestAnimFrame(positionLoop);
-					var positions = ctracker.getCurrentPosition();
-					// do something with the positions ...
-					// print the positions
-					var positionString = "";
-					if (positions) {
-						for (var p = 0;p < 10;p++) {
-							positionString += "featurepoint "+p+" : ["+positions[p][0].toFixed(2)+","+positions[p][1].toFixed(2)+"]<br/>";
-						}
-                        document.getElementById('positions').innerHTML = positionString;
-                        document.getElementById('size').innerHTML = positions.length;
-					}
-				}
-				positionLoop();
+            function getLowerLip(positionArr) {
+                let lips = []
+                lowerLip.forEach(idx => {
+                    lips.push(positionArr[idx])
+                })
+                return lips
+            }
 
-                var canvasInput = document.getElementById('canvas');
-                const overlay = document.getElementById('overlay')
-                const oc = overlay.getContext('2d')
-				var cc = canvasInput.getContext('2d');
-				function drawLoop() {
-					requestAnimFrame(drawLoop);
-					cc.clearRect(0, 0, canvasInput.width, canvasInput.height);
-					// ctracker.draw(canvasInput);
-				}
-				drawLoop();
+            function drawLips(context) {
+                let positions = ctracker.getCurrentPosition();
+                const upper = getUpperLip(positions)
+                const lower = getLowerLip(positions)
+                context.clearRect(0, 0, overlay.width, overlay.height);
+                console.log('context cleared')
+                console.log('upper is ', upper)
+                context.moveTo(upper[0][0], upper[0][0])
+                context.lineTo(upper[1][0], upper[1][1])
+                context.stroke()
+            }
+
+
+            let overlay = document.getElementById('overlay')
+            let oc = overlay.getContext('2d')
+            oc.strokeStyle = 'rgba(255, 100, 100, .6)'
+            oc.fillStyle = 'rgba(255, 100, 100, .6)'
+            oc.lineJoin = "round"
+            oc.lineWidth = 6
+            oc.globalAlpha = .6;
+            function positionLoop() {
+                requestAnimFrame(positionLoop);
+                /*                 let positions = ctracker.getCurrentPosition()
+                                console.log('positions', positions)
+                                let position1 = positions[0]
+                                console.log('position1', position1)
+                                let position2 = positions[1]
+                                oc.moveTo(position1[0], position1[1])
+                                oc.beginPath()
+                                oc.lineTo(position2[0], position2[1])
+                                oc.stroke() */
+                // drawLips(oc)
+                let positions = ctracker.getCurrentPosition()
+                if (!positions) return
+
+                oc.clearRect(0, 0, overlay.width, overlay.height);
+                oc.beginPath()
+                oc.moveTo(positions[upperLipTop[0][0]], upperLipTop[0][1])
+                for (i = 0; i < upperLipTop.length - 1; i++) {
+                    let j = i+1
+                    current = positions[upperLipTop[i]]
+                    next = positions[upperLipTop[j]]
+                    if (!current || !next) return
+
+                    oc.lineTo(current[0], current[1])
+                    oc.lineTo(next[0], next[1])
+                }
+                oc.closePath()
+                oc.stroke()
+                oc.fill()
+                oc.beginPath()
+                oc.moveTo(positions[lowerLip[0][0]], lowerLip[0][1])
+                for (i = 0; i < lowerLip.length - 1; i++) {
+                    let j = i+1
+                    current = positions[lowerLip[i]]
+                    next = positions[lowerLip[j]]
+                    if (!current || !next) return
+
+                    oc.lineTo(current[0], current[1])
+                    oc.lineTo(next[0], next[1])
+                }
+                oc.closePath()
+                oc.stroke()
+                oc.fill()
+
+                document.getElementById('log').innerHTML = position1x.toString() + '    ' + position2y.toString();
+                // do something with the positions ...
+                // print the positions
+                var positionString = "";
+                if (positions) {
+                    for (var p = 0; p < 10; p++) {
+                        positionString += "featurepoint " + p + " : [" + positions[p][0].toFixed(2) + "," + positions[p][1].toFixed(2) + "]<br/>";
+                    }
+                    document.getElementById('positions').innerHTML = positionString;
+                    document.getElementById('size').innerHTML = positions.length;
+                }
+            }
+            positionLoop();
+
+            // var canvasInput = document.getElementById('canvas');
+            // var cc = canvasInput.getContext('2d');
+            function drawLoop() {
+                requestAnimFrame(drawLoop);
+                // ctracker.draw(overlay);
+            }
+            drawLoop();
         </script>
     </div>
 </body>
