@@ -82,5 +82,33 @@ getCurrentPosition() - gives an array of length 71 with landmarks (look up githu
     62 - bridge, bottom
     63-66 - ul,ur,br,bl of left eye
     67-70 - ur, ul, bl, br of right eye 
+
+## canvas 2d, rendering makeup 
+
+1. draw a path
+    methods:
+        beginPath() - call this first
+        closePath() - automatically draws a line from current position to start of path
+        stroke() - draws shape by stroking outline (call this last?)
+        fill() - draws solid shape filling in outline 
+        moveTo(x,y) - moves the pencil to point 
+        lineTo(x,y) - draws straight line 
+        arcTo(x1,y1,x2,y2, radius) - draws arc with
+        quadraticCurveTo(cplx, cply, x, y) - where cpl is control point
+        bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y) - has 2 control points
+2.  svg path newPath2D('<!-- svg path -->')
+3.  colors 
+    setting pencil and paintbrush
+        1.  ctx.fillStyle = ...
+        2.  ctx.strokeStyle = ...
+        3.  transparency - use rgba i.e. ctx.fillStyle = 'rgba(255, 0, 0, 0.5')
+            or ctx.globalAlpha = ...
+4.  line props 
+    a.  lineWidth = 0-10 (pixels?)
+    b.  linejoin - affects appearance of corners, bevel, round, miter
+5.  gradients
+    a.  ctx.createLinearGradient(x1, y1, x2, y2)
+    b.  ctx.createRadialGradient(x1, y1, r1, x2, y2, r2)
+    c.  gradient.addColorStop(position, color) - position is relative position 0.0 to 1.0 set on a gradient object returned from above 
 ## definitions 
 
