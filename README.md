@@ -63,6 +63,24 @@ example:
 init() - called first, no args
 start(vid) - attaches ctracker to a video
 draw() - draws to canvas(canvasInput) - draws to canvas element 
-
+getCurrentPosition() - gives an array of length 71 with landmarks (look up github page for which point refers to which landmark)
+    0-14, jawline
+    15-18, right eyebrow, rtl
+    19-22, left eyebrow, ltr
+    23-26, ltrb of left eye, respectively
+    27, left eye center 
+    28-31, rtlb of right eye
+    32, right eye center 
+    33, t nose
+    34 - 40, nostril sides and bottom ltr
+    41, nose bridge m
+    42 - 43, nostril top
+    44-50 top of upper lip, ltr
+    51-55 bottom of bottom lip, rtl
+    56-58 top of bottom lip, ltr
+    59-61 bottom of top lip, rtl
+    62 - bridge, bottom
+    63-66 - ul,ur,br,bl of left eye
+    67-70 - ur, ul, bl, br of right eye 
 ## definitions 
 

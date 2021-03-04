@@ -14,8 +14,7 @@
             max-width: 1150px;
         }
 
-        #overlay,
-        #webgl {
+        #canvas {
             position: absolute;
             top: 0px;
             left: 0px;
@@ -100,9 +99,11 @@
             <video id="videoel" width="400" height="300" preload="auto" playsinline autoplay>
             </video>
             <canvas id="canvas" width="400" height="300"></canvas>
+            <canvas id="overlay" width="400" height="300"></canvas>
         </div>
         <br />
         <p id="positions"></p>
+        <p id="size"></p>
         <script>
             var vid = document.getElementById('videoel');
             var vid_width = vid.width;
@@ -182,17 +183,20 @@
 						for (var p = 0;p < 10;p++) {
 							positionString += "featurepoint "+p+" : ["+positions[p][0].toFixed(2)+","+positions[p][1].toFixed(2)+"]<br/>";
 						}
-						document.getElementById('positions').innerHTML = positionString;
+                        document.getElementById('positions').innerHTML = positionString;
+                        document.getElementById('size').innerHTML = positions.length;
 					}
 				}
 				positionLoop();
 
-				var canvasInput = document.getElementById('canvas');
+                var canvasInput = document.getElementById('canvas');
+                const overlay = document.getElementById('overlay')
+                const oc = overlay.getContext('2d')
 				var cc = canvasInput.getContext('2d');
 				function drawLoop() {
 					requestAnimFrame(drawLoop);
 					cc.clearRect(0, 0, canvasInput.width, canvasInput.height);
-					ctracker.draw(canvasInput);
+					// ctracker.draw(canvasInput);
 				}
 				drawLoop();
         </script>
