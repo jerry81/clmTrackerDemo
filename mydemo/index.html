@@ -88,10 +88,10 @@
     <div id="content">
         <h2>Face substitution</h2>
         <div id="container">
-            <video id="videoel" width="400" height="300" preload="auto" playsinline autoplay>
+            <video id="videoel" width="800" height="600" preload="auto" playsinline autoplay>
             </video>
             <!--             <canvas id="canvas" width="400" height="300"></canvas> -->
-            <canvas id="overlay" width="400" height="300"></canvas>
+            <canvas id="overlay" width="800" height="600"></canvas>
         </div>
         <br />
         <p id="positions"></p>
@@ -167,43 +167,13 @@
             var ctracker = new clm.tracker();
             ctracker.init();
             ctracker.start(vid);
-            function getUpperLip(positionArr) {
-                let lips = []
-                upperLipTop.forEach(idx => {
-                    lips.push(positionArr[idx])
-                })
-                return lips
-            }
-
-
-            function getLowerLip(positionArr) {
-                let lips = []
-                lowerLip.forEach(idx => {
-                    lips.push(positionArr[idx])
-                })
-                return lips
-            }
-
-            function drawLips(context) {
-                let positions = ctracker.getCurrentPosition();
-                const upper = getUpperLip(positions)
-                const lower = getLowerLip(positions)
-                context.clearRect(0, 0, overlay.width, overlay.height);
-                console.log('context cleared')
-                console.log('upper is ', upper)
-                context.moveTo(upper[0][0], upper[0][0])
-                context.lineTo(upper[1][0], upper[1][1])
-                context.stroke()
-            }
-
-
             let overlay = document.getElementById('overlay')
             let oc = overlay.getContext('2d')
-            oc.strokeStyle = 'rgba(255, 100, 100, .6)'
-            oc.fillStyle = 'rgba(255, 100, 100, .6)'
+            oc.strokeStyle = 'rgba(255, 100, 100)'
+            oc.fillStyle = 'rgba(255, 100, 100)'
             oc.lineJoin = "round"
-            oc.lineWidth = 6
-            oc.globalAlpha = .6;
+            oc.lineWidth = 1
+            oc.globalAlpha = .4;
             function positionLoop() {
                 requestAnimFrame(positionLoop);
                 /*                 let positions = ctracker.getCurrentPosition()
@@ -232,7 +202,7 @@
                     oc.lineTo(next[0], next[1])
                 }
                 oc.closePath()
-                oc.stroke()
+                // oc.stroke()
                 oc.fill()
                 oc.beginPath()
                 oc.moveTo(positions[lowerLip[0][0]], lowerLip[0][1])
@@ -246,7 +216,7 @@
                     oc.lineTo(next[0], next[1])
                 }
                 oc.closePath()
-                oc.stroke()
+                // oc.stroke()
                 oc.fill()
 
                 document.getElementById('log').innerHTML = position1x.toString() + '    ' + position2y.toString();
@@ -265,11 +235,11 @@
 
             // var canvasInput = document.getElementById('canvas');
             // var cc = canvasInput.getContext('2d');
-            function drawLoop() {
+/*             function drawLoop() {
                 requestAnimFrame(drawLoop);
                 // ctracker.draw(overlay);
             }
-            drawLoop();
+            drawLoop(); */
         </script>
     </div>
 </body>
